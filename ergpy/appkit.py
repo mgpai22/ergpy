@@ -25,7 +25,6 @@ from org.ergoplatform.appkit.impl import *
 
 def stringHasher(string):
     bytes = bytearray(string, 'utf-8')
-    print(hashlib.sha256(bytes).hexdigest())
     return hashlib.sha256(bytes).digest()
 
 
