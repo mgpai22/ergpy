@@ -7,7 +7,7 @@ clean:
 	rm -rf ./ergpy.egg-info
 
 install:
-	python -m pip install ./dist/ergpy-0.1.1.tar.gz
+	python -m pip install -e .
 
 uninstall:
-	python -m pip uninstall ergpy
+	python -m pip uninstall ergpy --yes

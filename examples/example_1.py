@@ -69,7 +69,7 @@ Note
     will be sent here as well. Make sure the prover index is specified as well (same index as address derivation).
 
 """
-# print(helper_functions.getWalletAddress(ergo=ergo, amount=5, walletMnemonic=wallet_mnemonic))
+print(helper_functions.getWalletAddress(ergo=ergo, amount=5, walletMnemonic=wallet_mnemonic))
 # print(helper_functions.getBoxInfo(ergo=ergo, index=0, senderAddress=receiver_addresses[0]))
 # print(helper_functions.simpleSend(ergo=ergo, amount=amount, walletMnemonic=wallet_mnemonic, receiverAddresses=receiver_addresses))
 # print(helper_functions.sendToken(ergo=ergo, amount=amount, receiverAddresses=receiver_addresses, tokens=tokens, walletMnemonic=wallet_mnemonic))
