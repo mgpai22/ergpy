@@ -11,3 +11,14 @@ install:
 
 uninstall:
 	python -m pip uninstall ergpy --yes
+
+vacuum:
+	make clean
+	make uninstall
+
+test1:
+	make vacuum
+	make build
+	make install
+	python examples/example_1.py
+	make vacuum 
