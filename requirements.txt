@@ -1,0 +1,4 @@
+setuptools>=40.8.0
+JPype1>=1.3.0
+requests>=2.27.1
+stubgenj>=0.2.5

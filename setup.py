@@ -18,8 +18,8 @@ CREATED AT
 from setuptools import setup
 
 # README.md as description
-with open('README.md', 'r') as fp:
-    long_description = fp.read()
+with open('./README.md', 'r') as fp:
+    long_description: str = fp.read()
 
 # Required packages
 packages: str = """

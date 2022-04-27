@@ -10,8 +10,15 @@ AUTHOR
 CREATED AT
     Wed. 20 Apr. 2022 23:43
 """
+# Import packages
+import logging
+
 # Import `ergpy`
 from ergpy import helper_functions, appkit
+
+# Logging utility
+logger: logging.Logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 # Create connection to the blockchain
 node_url: str = "http://213.239.193.208:9052/" # MainNet or TestNet
@@ -42,10 +49,10 @@ tokens = [
     ["tokenID_E", "tokenID_F"]
 ]
 
-nftName = "pythonWrapper NFT"
+nft_name = "pythonWrapper NFT"
 description = "created by MGpai's python wrapper"
-imageLink = "ipfs://bafkreihvadi66kddokso7x2i4kmqjhj5e3j44rn347i7drghekr2mfw3nu"
-imageHash = appkit.sha256caster("f500d1ef286372a4efdf48e299049d3d26d3ce45bbe7d1f1c4c722a3a616db6d")
+image_link = "ipfs://bafkreihvadi66kddokso7x2i4kmqjhj5e3j44rn347i7drghekr2mfw3nu"
+image_hash = appkit.sha256caster("f500d1ef286372a4efdf48e299049d3d26d3ce45bbe7d1f1c4c722a3a616db6d")
 
 
 """
@@ -69,9 +76,9 @@ Note
     will be sent here as well. Make sure the prover index is specified as well (same index as address derivation).
 
 """
-print(helper_functions.getWalletAddress(ergo=ergo, amount=5, walletMnemonic=wallet_mnemonic))
-# print(helper_functions.getBoxInfo(ergo=ergo, index=0, senderAddress=receiver_addresses[0]))
-# print(helper_functions.simpleSend(ergo=ergo, amount=amount, walletMnemonic=wallet_mnemonic, receiverAddresses=receiver_addresses))
-# print(helper_functions.sendToken(ergo=ergo, amount=amount, receiverAddresses=receiver_addresses, tokens=tokens, walletMnemonic=wallet_mnemonic))
-# print(helper_functions.createToken(ergo=ergo, tokenName=nftName, description=description, tokenAmount=1, tokenDecimals=0, walletMnemonic=wallet_mnemonic))
-# print(helper_functions.createNFT(ergo=ergo, nftName=nftName, description=description, imageLink=imageLink, imageHash=imageHash, walletMnemonic=wallet_mnemonic))
+print('Result:', helper_functions.get_wallet_address(ergo=ergo, amount=0, wallet_mnemonic=wallet_mnemonic))
+# print(helper_functions.get_box_info(ergo=ergo, index=0, sender_address=receiver_addresses[0]))
+# print(helper_functions.simple_send(ergo=ergo, amount=amount, wallet_mnemonic=wallet_mnemonic, receiver_addresses=receiver_addresses))
+# print(helper_functions.send_token(ergo=ergo, amount=amount, receiver_addresses=receiver_addresses, tokens=tokens, wallet_mnemonic=wallet_mnemonic))
+# print(helper_functions.create_token(ergo=ergo, token_name=nft_name, description=description, token_amount=1, token_decimals=0, wallet_mnemonic=wallet_mnemonic))
+# print(helper_functions.create_nft(ergo=ergo, nft_name=nft_name, description=description, image_link=image_link, image_hash=image_hash, wallet_mnemonic=wallet_mnemonic))
