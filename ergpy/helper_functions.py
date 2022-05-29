@@ -35,7 +35,7 @@ def initialize_jvm(function):
         
         finally:
             # Call function
-            function(*args, **kwargs)
+            return function(*args, **kwargs)
 
     return wrapper
 

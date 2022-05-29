@@ -11,12 +11,15 @@ CREATED AT
     Wed. 20 Apr. 2022 23:43
 """
 # Import packages
+import json
 import logging
 
 # Import `ergpy`
 from ergpy import helper_functions, appkit
 
 # Logging utility
+LOGGING_FORMAT = '[%(asctime)s] - [%(levelname)-8s] -  %(message)s'
+logging.basicConfig(format=LOGGING_FORMAT)
 logger: logging.Logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
@@ -76,7 +79,13 @@ Note
     will be sent here as well. Make sure the prover index is specified as well (same index as address derivation).
 
 """
-print('Result:', helper_functions.get_wallet_address(ergo=ergo, amount=0, wallet_mnemonic=wallet_mnemonic))
+
+# Assertions / tests
+assert json.loads(helper_functions.get_wallet_address(ergo=ergo, amount=1, wallet_mnemonic=wallet_mnemonic))[0] == "3Wz5WvHQe1G5kvLwMBeuxjaChd1j2RzdzFipCmHnJ1MMX7jAvA8f"
+logging.info("Tests passed")
+
+# Logging to console
+logging.info(f'Result: {helper_functions.get_wallet_address(ergo=ergo, amount=1, wallet_mnemonic=wallet_mnemonic)}')
 # print(helper_functions.get_box_info(ergo=ergo, index=0, sender_address=receiver_addresses[0]))
 # print(helper_functions.simple_send(ergo=ergo, amount=amount, wallet_mnemonic=wallet_mnemonic, receiver_addresses=receiver_addresses))
 # print(helper_functions.send_token(ergo=ergo, amount=amount, receiver_addresses=receiver_addresses, tokens=tokens, wallet_mnemonic=wallet_mnemonic))
