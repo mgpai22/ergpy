@@ -124,7 +124,7 @@ def create_nft(ergo: appkit.ErgoAppKit, nft_name: str, description: str, image_l
               wallet_mnemonic: str, receiver_addresses: str = None,
               mnemonic_password: str = None, amount: list = None,
               sender_address: str = None, prover_index: int = None, base64reduced: bool = None):
-    amount = [0.0001] if amount is None else amount
+    amount = [0.0002] if amount is None else amount
     
     # Get mnemonic
     ergo.getMnemonic(wallet_mnemonic=wallet_mnemonic, mnemonic_password=mnemonic_password)
