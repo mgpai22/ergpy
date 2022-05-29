@@ -130,7 +130,7 @@ def create_nft(ergo: appkit.ErgoAppKit, nft_name: str, description: str, image_l
     ergo.getMnemonic(wallet_mnemonic=wallet_mnemonic, mnemonic_password=mnemonic_password)
 
     # Get sender address
-    sender_address = (ergo.getSenderAddress(index=0, walletMnemonic=mnemonic[1], walletPassword=mnemonic[2])) \
+    sender_address = (ergo.getSenderAddress(index=0, wallet_mnemonic=mnemonic[1], wallet_password=mnemonic[2])) \
         if sender_address is None \
         else ergo.castAddress(sender_address)
     
