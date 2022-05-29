@@ -105,7 +105,7 @@ def send_token(ergo: appkit.ErgoAppKit, amount: list, receiver_addresses: list, 
         else ergo.castAddress(sender_address)
     
     # Get input and output box
-    input_box = ergo.getInputBox(amount_list=amount, sender_aAddress=sender_address)
+    input_box = ergo.getInputBox(amount_list=amount, sender_address=sender_address)
     out_box = ergo.tokenOutBox(receiver_wallet_addresses=receiver_addresses, amount_list=amount, tokens=tokens)
     
     # Build transaction
