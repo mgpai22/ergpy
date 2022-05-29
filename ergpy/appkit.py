@@ -215,7 +215,7 @@ class ErgoAppKit:
             out_box.append(box)
             amount_counter += 1
 
-        return outBox
+        return out_box
 
     def buildUnsignedTransaction(self, input_box: InputBox, outBox: list, sender_address) -> UnsignedTransaction:
         """Build an unsigned transaction."""
