@@ -22,7 +22,6 @@ def initialize_jvm(function):
     Initialize the JVM before calling the function.
     """
     def wrapper(*args, **kwargs):
-        logging.info(function.__name__)
         try:
             # Import content inside jar file
             jpype.addClassPath('ergo.jar')
@@ -35,7 +34,10 @@ def initialize_jvm(function):
         
         finally:
             # Call function
-            return function(*args, **kwargs)
+            res = function(*args, **kwargs)
+            jpype.java.lang.System.exit(0)
+
+            return res
 
     return wrapper
 
