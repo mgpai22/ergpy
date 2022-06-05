@@ -1,0 +1,50 @@
+name: 'Continuous Integration'
+
+on:
+  pull_request:
+    types:
+      - opened
+    branches:
+      - main
+      - dev
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        platform: [ubuntu-20.04]
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      - run: sh tests/package/package.sh
+
+  quality:
+    needs: build
+    strategy:
+      matrix:
+        platform: [ubuntu-20.04]
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      - run: sh tests/package/package.sh
+      - run: sh tests/quality/lint.sh
+
+  integration:
+    needs: build
+    strategy:
+      matrix:
+        platform: [ubuntu-20.04]
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      - run: sh tests/package/package.sh
+      - run: python tests/integration/test_helper_functions.py
