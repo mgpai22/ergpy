@@ -91,3 +91,6 @@ logging.info(f'Result: {helper_functions.get_wallet_address(ergo=ergo, amount=1,
 # print(helper_functions.send_token(ergo=ergo, amount=amount, receiver_addresses=receiver_addresses, tokens=tokens, wallet_mnemonic=wallet_mnemonic))
 # print(helper_functions.create_token(ergo=ergo, token_name=nft_name, description=description, token_amount=1, token_decimals=0, wallet_mnemonic=wallet_mnemonic))
 # print(helper_functions.create_nft(ergo=ergo, nft_name=nft_name, description=description, image_link=image_link, image_hash=image_hash, wallet_mnemonic=wallet_mnemonic))
+
+# Proper exit()
+helper_functions.exit()
