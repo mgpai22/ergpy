@@ -47,4 +47,4 @@ jobs:
         with:
           python-version: '3.8'
       - run: sh tests/package/package.sh
-      - run: sh tests/integration/test_helper_functions.sh
+      - run: python tests/integration/test_helper_functions.py
