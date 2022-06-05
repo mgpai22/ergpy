@@ -21,13 +21,13 @@ logger.setLevel(logging.INFO)
 # Tested functions
 def test_get_wallet_address():
     # Expected
-    expected: str = "3Wz5WvHQe1G5kvLwMBeuxjaChd1j2RzdzFipCmHnJ1MMX7jAvA8f"
+    expected: str = "3WykkLPB7PdS2MA7uTTWNSoCaYiZsSLPtS7ZuH9TUjRgiL75ygfa"
 
     # Arguments
     node_url: str = "http://213.239.193.208:9052/"
     ergo: ErgoAppKit = ErgoAppKit(node_url=node_url)
     amount: int = 1
-    wallet_mnemonic: str = ""
+    wallet_mnemonic: str = "what stadium typical spell rate truly pen tongue fuel intact fluid strike vibrant city shine"
 
     # Call function
     logging.info('BEGIN get_wallet_address')
