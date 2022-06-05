@@ -22,7 +22,6 @@ def initialize_jvm(function):
     Initialize the JVM before calling the function.
     """
     def wrapper(*args, **kwargs):
-        logging.info(function.__name__)
         try:
             # Import content inside jar file
             jpype.addClassPath('ergo.jar')
@@ -35,9 +34,15 @@ def initialize_jvm(function):
         
         finally:
             # Call function
-            return function(*args, **kwargs)
+            res = function(*args, **kwargs)
+
+            return res
 
     return wrapper
+
+@initialize_jvm
+def exit():
+    jpype.java.lang.System.exit(0)
 
 @initialize_jvm
 def get_wallet_address(ergo: appkit.ErgoAppKit, amount: int, wallet_mnemonic: str,
@@ -127,7 +132,7 @@ def create_nft(ergo: appkit.ErgoAppKit, nft_name: str, description: str, image_l
     amount = [0.0002] if amount is None else amount
     
     # Get mnemonic
-    ergo.getMnemonic(wallet_mnemonic=wallet_mnemonic, mnemonic_password=mnemonic_password)
+    mnemonic = ergo.getMnemonic(wallet_mnemonic=wallet_mnemonic, mnemonic_password=mnemonic_password)
 
     # Get sender address
     sender_address = (ergo.getSenderAddress(index=0, wallet_mnemonic=mnemonic[1], wallet_password=mnemonic[2])) \

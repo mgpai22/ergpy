@@ -8,9 +8,6 @@ A python-jvm wrapper for interacting with the Ergo blockchain.
 - Requires Java 8 or higher to be installed on system
 
 ```
-pip install JPype1
-```
-```
 pip install ergpy
 ```
 - There are helper methods created to do simple transactions
