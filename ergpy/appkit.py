@@ -30,6 +30,7 @@ import java.lang
 from org.ergoplatform.appkit import *
 from org.ergoplatform.appkit.impl import *
 
+
 # Notice:
 # In order to get the stubs (code completion) run : 
 # python -m stubgenj --convert-strings --classpath "ergo.jar" org.ergoplatform java
@@ -52,7 +53,7 @@ def file_hasher(filename):
 
 
 def get_node_info(node_url):
-    """Return informations about the Node from given url.
+    """Return information about the Node from given url.
     
     Ref:
     ```
@@ -73,12 +74,22 @@ class TripExecutor(object):
         return blockchain_context
 
 
+def tokenOutBoxList(tokens: list):
+    token_list = [ErgoToken(token, 1) for token in tokens]
+    return token_list
+
+
+def get_outputs_to_spend(signed_tx: SignedTransaction, index_for_outbox):
+    outputs = java.util.ArrayList([signed_tx.getOutputsToSpend().get(index_for_outbox)])
+    return outputs
+
+
 class ErgoAppKit:
     """AppKit class to interact with Ergo blockchain."""
 
     def __init__(self, node_url):
         """Natural constructor for ErgoAppKit"""
-        # Get node informations
+        # Get node information
         network = get_node_info(node_url)
 
         # Check if node is on MainNet or TestNet
@@ -114,8 +125,31 @@ class ErgoAppKit:
             .withInputBoxesLoader(ExplorerAndPoolUnspentBoxesLoader()) \
             .loadTop()
 
+    def getInputBoxCovering(self, amount_list: list, sender_address, tokenList: list = None,
+                            amount_tokens: list = None):
+        amount_total = jpype.JLong(Parameters.OneErg * (sum(amount_list) + 0.001))
+        token_list = []
+        token_amount_counter = 0
+        if tokenList is None:
+            token_list = java.util.ArrayList([])
+        else:
+            if amount_tokens is None:
+                token_list = java.util.ArrayList([])
+                for token in tokenList:
+                    for x in token:
+                        token_list.add(ErgoToken(x, 1))
+            else:
+                for token in tokenList:
+                    amountTokens = amountTokens[token_amount_counter]
+                    for x in token:
+                        tokensToSend = amountTokens[token_amount_counter]
+                        token_list.append(ErgoToken(x, tokensToSend))
+                    token_amount_counter += 1
+                token_list = java.util.ArrayList(token_list)
+        return self._ctx.getCoveringBoxesFor(sender_address, amount_total, token_list).getBoxes()
+
     def getBoxInfo(self, box, index) -> str:
-        """Get information from box."""
+        """Get information box information."""
         return box \
             .get(index) \
             .getId() \
@@ -138,29 +172,30 @@ class ErgoAppKit:
         amount_total = jpype.JLong(Parameters.OneErg * amount_list[0])
         tb = self._ctx.newTxBuilder()
         return [tb
-            .outBoxBuilder() \
-            .value(amount_total) \
-            .mintToken(nft) \
-            .contract(ErgoTreeContract(receiver_wallet_address.getErgoAddress().script(), self._networkType)) \
-            .build()
-        ]
+                    .outBoxBuilder() \
+                    .value(amount_total) \
+                    .mintToken(nft) \
+                    .contract(ErgoTreeContract(receiver_wallet_address.getErgoAddress().script(), self._networkType)) \
+                    .build()
+                ]
 
     def tokenMinterOutBox(self, input_box, token_name, token_description,
-        token_amount, token_decimals, amount_list: list,
-        receiver_wallet_address: Address):
+                          token_amount, token_decimals, amount_list: list,
+                          receiver_wallet_address: Address):
         """TODO Complete documentation"""
-        token = Eip4Token(input_box.get(0).getId().toString(), token_amount, token_name, token_description, token_decimals)
+        token = Eip4Token(input_box.get(0).getId().toString(), token_amount, token_name, token_description,
+                          token_decimals)
         amount_total = jpype.JLong(Parameters.OneErg * amount_list[0])
         tb = self._ctx.newTxBuilder()
         return [tb
-            .outBoxBuilder() \
-            .value(amount_total) \
-            .mintToken(token) \
-            .contract(
-                ErgoTreeContract(receiver_wallet_address.getErgoAddress().script(), self._networkType)
-                ) \
-            .build() \
-        ]
+                    .outBoxBuilder() \
+                    .value(amount_total) \
+                    .mintToken(token) \
+                    .contract(
+            ErgoTreeContract(receiver_wallet_address.getErgoAddress().script(), self._networkType)
+        ) \
+                    .build() \
+                ]
 
     def buildOutBox(self, receiver_wallet_addresses: list, amount_list: list):
         """TODO Complete documentation"""
@@ -197,7 +232,7 @@ class ErgoAppKit:
                 tList = [ErgoToken(x, amount_tokens[token_amount_counter]) for x in token]
                 token_list.append(tList)
                 token_amount_counter += 1
-        
+
         # TODO Complete documentation
         addresses = [Address.create(rw_address) for rw_address in receiver_wallet_addresses]
         tb = self._ctx.newTxBuilder()
@@ -205,13 +240,13 @@ class ErgoAppKit:
         # TODO Complete documentation
         for j in addresses:
             ergo = jpype.JLong(Parameters.OneErg * amount_list[amount_counter])
-            
+
             box = tb.outBoxBuilder() \
                 .value(ergo) \
                 .tokens(token_list[amount_counter]) \
                 .contract(ErgoTreeContract(j.getErgoAddress().script(), self._networkType)) \
                 .build()
-            
+
             out_box.append(box)
             amount_counter += 1
 
@@ -226,13 +261,45 @@ class ErgoAppKit:
             .sendChangeTo(sender_address.asP2PK()) \
             .build()
 
+    def buildUnsignedTransactionChained(self, input_box: [InputBox], outBox: list, sender_address,
+                                        amount_list: list, tokens=None) -> UnsignedTransaction:
+
+        """Build an unsigned chained transaction."""
+        tb = self._ctx.newTxBuilder()
+        input_box1: InputBox = input_box[0]
+        ergo = jpype.JLong((abs(input_box1.getValue() - (Parameters.OneErg * (sum(amount_list) + 0.001)))))
+        if tokens:
+            t_list = []
+            for i in range(len(input_box1.getTokens())):
+                token = input_box1.getTokens().get(i).getId()
+                t_list.append(token)
+            tokens = tokenOutBoxList(t_list)
+            tokens.pop(0)
+            box = tb.outBoxBuilder() \
+                .value(ergo) \
+                .tokens(tokens) \
+                .contract(ErgoTreeContract(sender_address.getErgoAddress().script(), self._networkType)) \
+                .build()
+        else:
+            box = tb.outBoxBuilder() \
+                .value(ergo) \
+                .contract(ErgoTreeContract(sender_address.getErgoAddress().script(), self._networkType)) \
+                .build()
+        outBox.insert(0, box)
+        return self._ctx.newTxBuilder() \
+            .boxesToSpend(input_box) \
+            .outputs(outBox) \
+            .fee(Parameters.MinFee) \
+            .sendChangeTo(sender_address.asP2PK()) \
+            .build()
+
     def getBase64ReducedTX(self, unsigned_txx: UnsignedTransaction):
         """Reduce transaction to basae64."""
         reduced_tx = self._ctx \
             .newProverBuilder() \
             .build() \
             .reduce(unsigned_txx, 0)
-    
+
         return base64 \
             .urlsafe_b64encode(reduced_tx.toBytes()) \
             .decode('utf-8')
@@ -246,7 +313,7 @@ class ErgoAppKit:
         return WMnemonic, wM, wP
 
     def signTransaction(self, unsigned_tx: UnsignedTransaction, w_mnemonic: Mnemonic,
-        prover_index: int = None) -> SignedTransaction:
+                        prover_index: int = None) -> SignedTransaction:
         """Sign a transaction"""
         prover_index = 0 if prover_index is None else prover_index
 
