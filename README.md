@@ -48,7 +48,7 @@ git clone https://github.com/mgpai22/ergpy && cd ergpy
 pip3 install -r requirements.txt
 ```
 ```
-python -m stubgenj --convert-strings --classpath "ergo.jar" org.ergoplatform java
+python -m stubgenj --convert-strings --classpath "./ergpy/ergo.jar" org.ergoplatform java
 ```
 - If using an ide such as pycharm , make sure the root folder is ergpy
     - This allows code completion via stubgenj to work properly
