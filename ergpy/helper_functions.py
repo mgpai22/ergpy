@@ -35,11 +35,14 @@ def initialize_jvm(function):
         finally:
             # Call function
             res = function(*args, **kwargs)
-            jpype.java.lang.System.exit(0)
 
             return res
 
     return wrapper
+
+@initialize_jvm
+def exit():
+    jpype.java.lang.System.exit(0)
 
 @initialize_jvm
 def get_wallet_address(ergo: appkit.ErgoAppKit, amount: int, wallet_mnemonic: str,

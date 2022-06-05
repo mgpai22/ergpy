@@ -5,7 +5,6 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 
-@helper_functions.initialize_jvm
 def main():
     node_url: str = "http://213.239.193.208:9052/"  # MainNet or TestNet
     ergo = appkit.ErgoAppKit(node_url=node_url)
@@ -20,7 +19,7 @@ def main():
 
     try:
         logging.info("simple_send in progress...")
-        tx = helper_functions.simple_send(ergo=ergo, amount=amount, wallet_mnemonic=wallet_mnemonic, receiver_addresses=receiver_addresses)
+        tx = helper_functions.simple_send(ergo=ergo, amount=amount, wallet_mnemonic=wallet_mnemonic, receiver_addresses=receiver_addresses, base64reduced=True)
         logging.info("simple_send done")
     except Exception as e:
         logging.error("Error: %s", e)
@@ -32,6 +31,7 @@ def main():
     with open('demo.text', 'w') as file:
         file.write(data)
     logging.info("wrote to file")
+    helper_functions.exit()
 
 if __name__ == "__main__":
     main()
