@@ -219,8 +219,3 @@ def create_token(ergo: appkit.ErgoAppKit, token_name: str, description: str, tok
     signed_tx = ergo.signTransaction(unsigned_tx, mnemonic[0], prover_index)
 
     return ergo.txId(signed_tx)
-
-
-@initialize_jvm
-def exit():
-    return jpype.java.lang.System.exit(0)
