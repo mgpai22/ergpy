@@ -125,7 +125,7 @@ def create_issuer_box(ergo: appkit.ErgoAppKit, wallet_mnemonic: str, royalty_amo
     # Get input box
     if input_box is None:
         # input_box = ergo.getInputBox(amount_list=[0.005], sender_address=sender_address)
-        input_box = ergo.getInputBoxCovering(amount_list=[0.002], sender_address=sender_address)
+        input_box = ergo.getInputBoxCovering(amount_list=[0.002 * amount_of_boxes], sender_address=sender_address)
 
     # Get output box
     out_box = ergo.NFT_issuer_box(sender_address=sender_address, amount_of_boxes=amount_of_boxes, royalty_amount_in_percent=royalty_amount_in_percent)
