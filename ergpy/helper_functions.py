@@ -47,6 +47,7 @@ def initialize_jvm(function):
 def exit():
     jpype.java.lang.System.exit(0)
 
+
 @initialize_jvm
 def get_wallet_address(ergo: appkit.ErgoAppKit, amount: int, wallet_mnemonic: str,
                        mnemonic_password: str = None) -> str:
@@ -110,6 +111,44 @@ def simple_send(ergo: appkit.ErgoAppKit, amount: list, receiver_addresses: list,
 
 
 @initialize_jvm
+def create_issuer_box(ergo: appkit.ErgoAppKit, wallet_mnemonic: str, royalty_amount_in_percent: int, amount_of_boxes: int,
+                      mnemonic_password: str = None, sender_address: str = None, prover_index: int = None,
+                      base64reduced: bool = None, input_box=None, return_signed=None, chained=None):
+    # Get mnemonic associated to wallet
+    mnemonic = ergo.getMnemonic(wallet_mnemonic=wallet_mnemonic, mnemonic_password=mnemonic_password)
+
+    # Get sender address from mnemonic
+    sender_address = ergo.getSenderAddress(index=0, wallet_mnemonic=mnemonic[1], wallet_password=mnemonic[2]) \
+        if sender_address is None \
+        else ergo.castAddress(sender_address)
+
+    # Get input box
+    if input_box is None:
+        # input_box = ergo.getInputBox(amount_list=[0.005], sender_address=sender_address)
+        input_box = ergo.getInputBoxCovering(amount_list=[0.002], sender_address=sender_address)
+
+    # Get output box
+    out_box = ergo.NFT_issuer_box(sender_address=sender_address, amount_of_boxes=amount_of_boxes, royalty_amount_in_percent=royalty_amount_in_percent)
+
+    # Build unsigned transaction
+    if chained:
+        unsigned_tx = ergo.buildUnsignedTransactionChained(input_box=input_box, outBox=out_box,
+                                                           sender_address=sender_address, amount_list=[0.002])
+    else:
+        unsigned_tx = ergo.buildUnsignedTransaction(input_box=input_box, outBox=out_box, sender_address=sender_address)
+
+    if base64reduced:
+        return ergo.getBase64ReducedTX(unsigned_tx)
+
+    # Sign transaction
+    signed_tx = ergo.signTransaction(unsigned_tx, mnemonic[0], prover_index)
+    if return_signed:
+        return signed_tx
+
+    return ergo.txId(signed_tx)
+
+
+@initialize_jvm
 def send_token(ergo: appkit.ErgoAppKit, amount: list, receiver_addresses: list, tokens: list, wallet_mnemonic: str,
                input_box=None, amount_tokens=None,
                mnemonic_password: str = None, sender_address: str = None, prover_index: int = None,
@@ -126,7 +165,8 @@ def send_token(ergo: appkit.ErgoAppKit, amount: list, receiver_addresses: list, 
     if input_box is None:
         input_box = ergo.getInputBoxCovering(amount_list=amount, sender_address=sender_address, tokenList=tokens,
                                              amount_tokens=amount_tokens)
-    out_box = ergo.tokenOutBox(receiver_wallet_addresses=receiver_addresses, amount_list=amount, tokens=tokens, amount_tokens=amount_tokens)
+    out_box = ergo.tokenOutBox(receiver_wallet_addresses=receiver_addresses, amount_list=amount, tokens=tokens,
+                               amount_tokens=amount_tokens)
 
     # Build transaction
     if chained:
@@ -149,9 +189,9 @@ def send_token(ergo: appkit.ErgoAppKit, amount: list, receiver_addresses: list, 
 
 @initialize_jvm
 def create_nft(ergo: appkit.ErgoAppKit, nft_name: str, description: str, image_link: str, image_hash: bytes,
-               wallet_mnemonic: str, receiver_addresses: str = None,
+               wallet_mnemonic: str, input_box=None, receiver_addresses: str = None,
                mnemonic_password: str = None, amount: list = None,
-               sender_address: str = None, prover_index: int = None, base64reduced: bool = None):
+               sender_address: str = None, prover_index: int = None, base64reduced: bool = None, return_signed=None, chained=None):
     amount = [0.0002] if amount is None else amount
 
     # Get mnemonic
@@ -167,18 +207,26 @@ def create_nft(ergo: appkit.ErgoAppKit, nft_name: str, description: str, image_l
     receiver_addresses = sender_address if receiver_addresses is None else ergo.castAddress(receiver_addresses)
 
     # Build NFT
-    input_box = ergo.getInputBox(amount_list=amount, sender_address=sender_address)
+    if input_box is None:
+        input_box = ergo.getInputBox(amount_list=amount, sender_address=sender_address)
+
     nft = ergo.NFTbuilder(input_box, nft_name, description, image_link, image_hash)
     out_box = ergo.nftOutBox(nft, amount, receiver_addresses)
 
     # Build transaction
-    unsigned_tx = ergo.buildUnsignedTransaction(input_box=input_box, outBox=out_box, sender_address=sender_address)
+    if chained:
+        unsigned_tx = ergo.buildUnsignedTransactionChained(input_box=input_box, outBox=out_box,
+                                                           sender_address=sender_address, amount_list=amount)
+    else:
+        unsigned_tx = ergo.buildUnsignedTransaction(input_box=input_box, outBox=out_box, sender_address=sender_address)
 
     if base64reduced:
         return ergo.getBase64ReducedTX(unsigned_tx)
 
     # Sign transaction
     signed_tx = ergo.signTransaction(unsigned_tx, mnemonic[0], prover_index)
+    if return_signed:
+        return signed_tx
 
     return ergo.txId(signed_tx)
 
