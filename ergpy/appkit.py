@@ -79,9 +79,10 @@ def tokenOutBoxList(tokens: list):
     return token_list
 
 
-def get_outputs_to_spend(signed_tx: SignedTransaction, index_for_outbox):
-    outputs = java.util.ArrayList([signed_tx.getOutputsToSpend().get(index_for_outbox)])
-    return outputs
+def get_outputs_to_spend(signed_tx: SignedTransaction, index_for_outbox=None):
+    if index_for_outbox is None:
+        return java.util.ArrayList([signed_tx.getOutputsToSpend()])
+    return java.util.ArrayList([signed_tx.getOutputsToSpend().get(index_for_outbox)])
 
 
 class ErgoAppKit:
@@ -179,6 +180,22 @@ class ErgoAppKit:
                     .build()
                 ]
 
+    def NFT_issuer_box(self, sender_address, amount_of_boxes, royalty_amount_in_percent):
+        try:
+            address = Address.create(sender_address)
+        except Exception as e:
+            address = sender_address
+        outbox = []
+        tb = self._ctx.newTxBuilder()
+        for x in range(amount_of_boxes):
+            box = tb.outBoxBuilder() \
+                .value(jpype.JLong(0.002 * Parameters.OneErg)) \
+                .contract(ErgoTreeContract(address.getErgoAddress().script(), self._networkType)) \
+                .registers([ErgoValue.of(jpype.JInt(royalty_amount_in_percent * 10))]) \
+                .build()
+            outbox.append(box)
+        return outbox
+
     def tokenMinterOutBox(self, input_box, token_name, token_description,
                           token_amount, token_decimals, amount_list: list,
                           receiver_wallet_address: Address):
@@ -262,7 +279,7 @@ class ErgoAppKit:
             .build()
 
     def buildUnsignedTransactionChained(self, input_box: [InputBox], outBox: list, sender_address,
-                                        amount_list: list, tokens=None) -> UnsignedTransaction:
+                                        amount_list: list, tokens=None, issuer_box=None, royalty_amount_in_percent=None) -> UnsignedTransaction:
 
         """Build an unsigned chained transaction."""
         tb = self._ctx.newTxBuilder()
@@ -283,6 +300,14 @@ class ErgoAppKit:
         else:
             box = tb.outBoxBuilder() \
                 .value(ergo) \
+                .contract(ErgoTreeContract(sender_address.getErgoAddress().script(), self._networkType)) \
+                .build()
+        if issuer_box:
+            if royalty_amount_in_percent is None:
+                royalty_amount_in_percent = 5
+            box = tb.outBoxBuilder() \
+                .value(ergo) \
+                .registers([ErgoValue.of(jpype.JInt(royalty_amount_in_percent * 10))]) \
                 .contract(ErgoTreeContract(sender_address.getErgoAddress().script(), self._networkType)) \
                 .build()
         outBox.insert(0, box)
