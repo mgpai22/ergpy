@@ -18,7 +18,7 @@ node_url: str = "http://213.239.193.208:9052/"  # MainNet or TestNet
 ergo = appkit.ErgoAppKit(node_url=node_url)
 
 # Wallet mnemonic
-wallet_mnemonic = "what stadium typical spell rate truly pen tongue fuel intact fluid strike vibrant city shine"
+wallet_mnemonic = "decline reward asthma enter three clean borrow repeat identify wisdom horn pull entire adapt neglect"
 
 amount_nfts_to_mint = 10
 royalty = 5

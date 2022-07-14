@@ -2,7 +2,7 @@
 Helper functions
 ================
 
-Utility functions to make everything easy.
+Utility functions to simplify ergpy
 
 AUTHOR
     mgpai22@GitHub
@@ -13,6 +13,8 @@ CREATED AT
 # Import external packages
 import json
 import logging
+from typing import List
+
 import jpype
 from ergpy import appkit
 
@@ -50,7 +52,7 @@ def exit():
 
 @initialize_jvm
 def get_wallet_address(ergo: appkit.ErgoAppKit, amount: int, wallet_mnemonic: str,
-                       mnemonic_password: str = None) -> str:
+                       mnemonic_password: str = None):
     # Get mnemonic
     mnemonic = ergo.getMnemonic(wallet_mnemonic=wallet_mnemonic, mnemonic_password=mnemonic_password)
 
@@ -60,17 +62,17 @@ def get_wallet_address(ergo: appkit.ErgoAppKit, amount: int, wallet_mnemonic: st
         for x in range(amount)
     ]
 
-    return json.dumps(addresses)
+    return addresses
 
 
 @initialize_jvm
-def get_box_info(ergo: appkit.ErgoAppKit, index: int, sender_address: str) -> str:
+def get_box_info(ergo: appkit.ErgoAppKit, index: int, sender_address: str, tokens: list = None) -> str:
     # Setup parameters
     amount = [1]
     sender_address = ergo.castAddress(sender_address)
-    input_box = ergo.getInputBox(amount_list=amount, sender_address=sender_address)
+    input_box = ergo.getInputBox(amount_list=amount, sender_address=sender_address, tokenList=tokens)
 
-    return ergo.getBoxInfo(input_box, index)
+    return appkit.getBoxInfo(input_box, index)
 
 
 @initialize_jvm
@@ -111,7 +113,8 @@ def simple_send(ergo: appkit.ErgoAppKit, amount: list, receiver_addresses: list,
 
 
 @initialize_jvm
-def create_issuer_box(ergo: appkit.ErgoAppKit, wallet_mnemonic: str, royalty_amount_in_percent: int, amount_of_boxes: int,
+def create_issuer_box(ergo: appkit.ErgoAppKit, wallet_mnemonic: str, royalty_amount_in_percent: int,
+                      amount_of_boxes: int,
                       mnemonic_password: str = None, sender_address: str = None, prover_index: int = None,
                       base64reduced: bool = None, input_box=None, return_signed=None, chained=None):
     # Get mnemonic associated to wallet
@@ -124,16 +127,16 @@ def create_issuer_box(ergo: appkit.ErgoAppKit, wallet_mnemonic: str, royalty_amo
 
     # Get input box
     if input_box is None:
-        # input_box = ergo.getInputBox(amount_list=[0.005], sender_address=sender_address)
-        input_box = ergo.getInputBoxCovering(amount_list=[0.002 * amount_of_boxes], sender_address=sender_address)
+        input_box = ergo.getInputBoxCovering(amount_list=[0.01 * amount_of_boxes], sender_address=sender_address)
 
     # Get output box
-    out_box = ergo.NFT_issuer_box(sender_address=sender_address, amount_of_boxes=amount_of_boxes, royalty_amount_in_percent=royalty_amount_in_percent)
+    out_box = ergo.NFT_issuer_box(sender_address=sender_address, amount_of_boxes=amount_of_boxes,
+                                  royalty_amount_in_percent=royalty_amount_in_percent)
 
     # Build unsigned transaction
     if chained:
         unsigned_tx = ergo.buildUnsignedTransactionChained(input_box=input_box, outBox=out_box,
-                                                           sender_address=sender_address, amount_list=[0.002])
+                                                           sender_address=sender_address, amount_list=[0.01])
     else:
         unsigned_tx = ergo.buildUnsignedTransaction(input_box=input_box, outBox=out_box, sender_address=sender_address)
 
@@ -191,8 +194,9 @@ def send_token(ergo: appkit.ErgoAppKit, amount: list, receiver_addresses: list, 
 def create_nft(ergo: appkit.ErgoAppKit, nft_name: str, description: str, image_link: str, image_hash: bytes,
                wallet_mnemonic: str, input_box=None, receiver_addresses: str = None,
                mnemonic_password: str = None, amount: list = None,
-               sender_address: str = None, prover_index: int = None, base64reduced: bool = None, return_signed=None, chained=None):
-    amount = [0.0002] if amount is None else amount
+               sender_address: str = None, prover_index: int = None, base64reduced: bool = None, return_signed=None,
+               chained=None):
+    amount = [0.001] if amount is None else amount
 
     # Get mnemonic
     mnemonic = ergo.getMnemonic(wallet_mnemonic=wallet_mnemonic, mnemonic_password=mnemonic_password)
@@ -208,7 +212,7 @@ def create_nft(ergo: appkit.ErgoAppKit, nft_name: str, description: str, image_l
 
     # Build NFT
     if input_box is None:
-        input_box = ergo.getInputBox(amount_list=amount, sender_address=sender_address)
+        input_box = ergo.getInputBox(amount_list=amount, sender_address=sender_address, tokenList=None)
 
     nft = ergo.NFTbuilder(input_box, nft_name, description, image_link, image_hash)
     out_box = ergo.nftOutBox(nft, amount, receiver_addresses)
@@ -241,7 +245,7 @@ def create_token(ergo: appkit.ErgoAppKit, token_name: str, description: str, tok
     # Get mnemonic
     mnemonic = ergo.getMnemonic(wallet_mnemonic=wallet_mnemonic, mnemonic_password=mnemonic_password)
 
-    #  Get sender address
+    # Get sender address
     sender_address = (ergo.getSenderAddress(index=0, wallet_mnemonic=mnemonic[1], wallet_password=mnemonic[2])) \
         if sender_address is None \
         else ergo.castAddress(sender_address)
@@ -251,7 +255,7 @@ def create_token(ergo: appkit.ErgoAppKit, token_name: str, description: str, tok
         if receiver_addresses is None \
         else ergo.castAddress(receiver_addresses)
 
-    input_box = ergo.getInputBox(amount_list=amount, sender_address=sender_address)
+    input_box = ergo.getInputBox(amount_list=amount, sender_address=sender_address, tokenList=None)
 
     # Mint token
     outBox = ergo.tokenMinterOutBox(input_box, token_name, description,

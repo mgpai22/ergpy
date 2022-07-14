@@ -2,7 +2,7 @@
 Application KIT
 ==============================
 
-TODO Write description here
+Appkit Version 4.0.10
 
 AUTHOR
     mgpai22@GitHub
@@ -65,7 +65,6 @@ def get_node_info(node_url):
         return requests.get(f'{node_url}/info').json()['network']
     except Exception as e:
         return requests.get(f'{node_url}info').json()['network']
-    
 
 
 @JImplements(java.util.function.Function)
@@ -80,10 +79,31 @@ def tokenOutBoxList(tokens: list):
     return token_list
 
 
-def get_outputs_to_spend(signed_tx: SignedTransaction, index_for_outbox=None):
+def get_outputs_to_spend(signed_tx: SignedTransaction, index_for_outbox=None, asArray=None):
     if index_for_outbox is None:
+        if asArray is False:
+            return signed_tx.getOutputsToSpend()
         return java.util.ArrayList([signed_tx.getOutputsToSpend()])
+    if asArray is False:
+        return signed_tx.getOutputsToSpend().get(index_for_outbox)
     return java.util.ArrayList([signed_tx.getOutputsToSpend().get(index_for_outbox)])
+
+
+def getBoxInfo(box, index) -> str:
+    """Get information box information."""
+    return box \
+        .get(index) \
+        .getId() \
+        .toString()
+
+
+def readable_box(boxes: list):
+    readable = []
+    for box in boxes:
+        x = str(box.get(0).getId())
+        print("box id:", x)
+        readable.append(x)
+    return readable
 
 
 class ErgoAppKit:
@@ -117,13 +137,21 @@ class ErgoAppKit:
         """Create an Eip3Address from given mnemonic phrase and mnemonic password."""
         return Address.createEip3Address(index, self._networkType, wallet_mnemonic, wallet_password)
 
-    def getInputBox(self, amount_list: list, sender_address) -> InputBox:
+    def getInputBox(self, amount_list: list, sender_address, tokenList) -> InputBox:
         """TODO Complete documentation"""
         amount_total = jpype.JLong(Parameters.OneErg * sum(amount_list))
+        if tokenList is None:
+            token_list = java.util.ArrayList([])
+        else:
+            token_list = java.util.ArrayList([])
+            for token in tokenList:
+                for x in token:
+                    token_list.add(ErgoToken(x, 1))
 
         return BoxOperations \
             .createForSender(sender_address, self._ctx) \
             .withAmountToSpend(amount_total) \
+            .withTokensToSpend(token_list) \
             .withInputBoxesLoader(ExplorerAndPoolUnspentBoxesLoader()) \
             .loadTop()
 
@@ -149,13 +177,6 @@ class ErgoAppKit:
                     token_amount_counter += 1
                 token_list = java.util.ArrayList(token_list)
         return self._ctx.getCoveringBoxesFor(sender_address, amount_total, token_list).getBoxes()
-
-    def getBoxInfo(self, box, index) -> str:
-        """Get information box information."""
-        return box \
-            .get(index) \
-            .getId() \
-            .toString()
 
     def NFTbuilder(self, input_box, name, description, image_link, sha256):
         """Mint a picture NFT token."""
@@ -190,7 +211,7 @@ class ErgoAppKit:
         tb = self._ctx.newTxBuilder()
         for x in range(amount_of_boxes):
             box = tb.outBoxBuilder() \
-                .value(jpype.JLong(0.002 * Parameters.OneErg)) \
+                .value(jpype.JLong(0.1 * Parameters.OneErg)) \
                 .contract(ErgoTreeContract(address.getErgoAddress().script(), self._networkType)) \
                 .registers([ErgoValue.of(jpype.JInt(royalty_amount_in_percent * 10))]) \
                 .build()
@@ -280,7 +301,8 @@ class ErgoAppKit:
             .build()
 
     def buildUnsignedTransactionChained(self, input_box: [InputBox], outBox: list, sender_address,
-                                        amount_list: list, tokens=None, issuer_box=None, royalty_amount_in_percent=None) -> UnsignedTransaction:
+                                        amount_list: list, tokens=None, issuer_box=None,
+                                        royalty_amount_in_percent=None) -> UnsignedTransaction:
 
         """Build an unsigned chained transaction."""
         tb = self._ctx.newTxBuilder()

@@ -28,10 +28,10 @@ node_url: str = "http://213.239.193.208:9052/" # MainNet or TestNet
 ergo = appkit.ErgoAppKit(node_url=node_url)
 
 # Wallet mnemonic
-wallet_mnemonic = ""
+wallet_mnemonic = "decline reward asthma enter three clean borrow repeat identify wisdom horn pull entire adapt neglect"
 
 # (optional) If you have a mnemonic password
-# mnemonicPassword = "my password" 
+# mnemonicPassword = "my password"
 
 """
 Note how the following parameters are inputed :
@@ -81,8 +81,8 @@ Note
 """
 
 # Assertions / tests
-assert json.loads(helper_functions.get_wallet_address(ergo=ergo, amount=1, wallet_mnemonic=wallet_mnemonic))[0] == "3Wz5WvHQe1G5kvLwMBeuxjaChd1j2RzdzFipCmHnJ1MMX7jAvA8f"
-logging.info("Tests passed")
+# assert json.loads(helper_functions.get_wallet_address(ergo=ergo, amount=1, wallet_mnemonic=wallet_mnemonic))[0] == "3Wx2YrSVcrPvC7uXQRp6ZQfRd7VxjZr6fjhFEX5r1yiM8nHkGv93"
+# logging.info("Tests passed")
 
 # Logging to console
 logging.info(f'Result: {helper_functions.get_wallet_address(ergo=ergo, amount=1, wallet_mnemonic=wallet_mnemonic)}')
