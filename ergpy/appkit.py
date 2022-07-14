@@ -65,6 +65,7 @@ def get_node_info(node_url):
         return requests.get(f'{node_url}/info').json()['network']
     except Exception as e:
         return requests.get(f'{node_url}info').json()['network']
+    
 
 
 @JImplements(java.util.function.Function)
