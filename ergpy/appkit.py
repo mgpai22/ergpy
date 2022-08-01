@@ -211,7 +211,7 @@ class ErgoAppKit:
         tb = self._ctx.newTxBuilder()
         for x in range(amount_of_boxes):
             box = tb.outBoxBuilder() \
-                .value(jpype.JLong(0.1 * Parameters.OneErg)) \
+                .value(jpype.JLong(0.002 * Parameters.OneErg)) \
                 .contract(ErgoTreeContract(address.getErgoAddress().script(), self._networkType)) \
                 .registers([ErgoValue.of(jpype.JInt(royalty_amount_in_percent * 10))]) \
                 .build()
