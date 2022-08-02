@@ -309,7 +309,7 @@ class ErgoAppKit:
     def buildUnsignedTransaction(self, input_box: InputBox, outBox: list, sender_address, fee=None) -> UnsignedTransaction:
         """Build an unsigned transaction."""
         if fee is None:
-            fee = Parameters.MinFee
+            fee = jpype.JLong(fee * Parameters.OneErg)
         else:
             fee = fee * Parameters.OneErg
         return self._ctx.newTxBuilder() \
@@ -327,7 +327,7 @@ class ErgoAppKit:
         if fee is None:
             fee = Parameters.MinFee
         else:
-            fee = fee * Parameters.OneErg
+            fee = jpype.JLong(fee * Parameters.OneErg)
         tb = self._ctx.newTxBuilder()
         input_box1: InputBox = input_box[0]
         ergo = jpype.JLong((abs(input_box1.getValue() - (Parameters.OneErg * (sum(amount_list) + 0.001)))))
