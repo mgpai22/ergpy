@@ -217,6 +217,21 @@ class ErgoAppKit:
                 .build()
             outbox.append(box)
         return outbox
+    
+    def genesis_box(self, sender_address, amount_of_boxes, amount):
+        try:
+            address = Address.create(sender_address)
+        except Exception as e:
+            address = sender_address
+        outbox = []
+        tb = self._ctx.newTxBuilder()
+        for x in range(amount_of_boxes):
+            box = tb.outBoxBuilder() \
+                .value(jpype.JLong(amount * Parameters.OneErg)) \
+                .contract(ErgoTreeContract(address.getErgoAddress().script(), self._networkType)) \
+                .build()
+            outbox.append(box)
+        return outbox
 
     def tokenMinterOutBox(self, input_box, token_name, token_description,
                           token_amount, token_decimals, amount_list: list,
@@ -291,20 +306,28 @@ class ErgoAppKit:
 
         return out_box
 
-    def buildUnsignedTransaction(self, input_box: InputBox, outBox: list, sender_address) -> UnsignedTransaction:
+    def buildUnsignedTransaction(self, input_box: InputBox, outBox: list, sender_address, fee=None) -> UnsignedTransaction:
         """Build an unsigned transaction."""
+        if fee is None:
+            fee = Parameters.MinFee
+        else:
+            fee = fee * Parameters.OneErg
         return self._ctx.newTxBuilder() \
             .boxesToSpend(input_box) \
             .outputs(outBox) \
-            .fee(Parameters.MinFee) \
+            .fee(fee) \
             .sendChangeTo(sender_address.asP2PK()) \
             .build()
 
     def buildUnsignedTransactionChained(self, input_box: [InputBox], outBox: list, sender_address,
                                         amount_list: list, tokens=None, issuer_box=None,
-                                        royalty_amount_in_percent=None) -> UnsignedTransaction:
+                                        royalty_amount_in_percent=None, fee=None) -> UnsignedTransaction:
 
         """Build an unsigned chained transaction."""
+        if fee is None:
+            fee = Parameters.MinFee
+        else:
+            fee = fee * Parameters.OneErg
         tb = self._ctx.newTxBuilder()
         input_box1: InputBox = input_box[0]
         ergo = jpype.JLong((abs(input_box1.getValue() - (Parameters.OneErg * (sum(amount_list) + 0.001)))))
@@ -337,7 +360,7 @@ class ErgoAppKit:
         return self._ctx.newTxBuilder() \
             .boxesToSpend(input_box) \
             .outputs(outBox) \
-            .fee(Parameters.MinFee) \
+            .fee(fee) \
             .sendChangeTo(sender_address.asP2PK()) \
             .build()
 
