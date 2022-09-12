@@ -109,25 +109,25 @@ def readable_box(boxes: list):
 class ErgoAppKit:
     """AppKit class to interact with Ergo blockchain."""
 
-    def __init__(self, node_url, explorer_url=None):
+    def __init__(self, node_url, api_url=None):
         """Natural constructor for ErgoAppKit"""
         # Get node information
         network = get_node_info(node_url)
-        self._explorer = explorer_url
+        self._api = api_url
 
         # Check if node is on MainNet or TestNet
         self._networkType = NetworkType.MAINNET if network.lower() == 'mainnet' else NetworkType.TESTNET
-        if self._explorer is None:
-            self._explorer = RestApiErgoClient.getDefaultExplorerUrl(self._networkType)
+        if self._api is None:
+            self._api = RestApiErgoClient.getDefaultExplorerUrl(self._networkType)
         else:
-            self._explorer = java.lang.String(self._explorer)
+            self._api = java.lang.String(self._api)
 
         # Setup Node Client
         node_client = RestApiErgoClient.create(
             node_url,
             self._networkType,
             "",
-            self._explorer
+            self._api
         )
 
         # Initialize attributes
@@ -164,6 +164,7 @@ class ErgoAppKit:
                             amount_tokens: list = None):
         amount_total = jpype.JLong(Parameters.OneErg * (sum(amount_list) + 0.001))
         token_list = []
+        tList = []
         token_amount_counter = 0
         if tokenList is None:
             token_list = java.util.ArrayList([])
@@ -175,12 +176,19 @@ class ErgoAppKit:
                         token_list.add(ErgoToken(x, 1))
             else:
                 for token in tokenList:
-                    amountTokens = amountTokens[token_amount_counter]
+                    token_amount_counter_local = 0
+                    token_amount_list = amount_tokens[token_amount_counter]
                     for x in token:
-                        tokensToSend = amountTokens[token_amount_counter]
-                        token_list.append(ErgoToken(x, tokensToSend))
+                        token_amount = token_amount_list[token_amount_counter_local]
+                        tList.append(ErgoToken(x, token_amount))
+                        token_amount_counter_local += 1
                     token_amount_counter += 1
-                token_list = java.util.ArrayList(token_list)
+                    token_list.append(tList)
+                    tList = []
+                res = []
+                for i in token_list:
+                    res.extend(i)
+                token_list = java.util.ArrayList(res)
         return self._ctx.getCoveringBoxesFor(sender_address, amount_total, token_list).getBoxes()
 
     def NFTbuilder(self, input_box, name, description, image_link, sha256):
