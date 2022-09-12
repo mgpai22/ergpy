@@ -109,20 +109,25 @@ def readable_box(boxes: list):
 class ErgoAppKit:
     """AppKit class to interact with Ergo blockchain."""
 
-    def __init__(self, node_url):
+    def __init__(self, node_url, explorer_url=None):
         """Natural constructor for ErgoAppKit"""
         # Get node information
         network = get_node_info(node_url)
+        self._explorer = explorer_url
 
         # Check if node is on MainNet or TestNet
         self._networkType = NetworkType.MAINNET if network.lower() == 'mainnet' else NetworkType.TESTNET
+        if self._explorer is None:
+            self._explorer = RestApiErgoClient.getDefaultExplorerUrl(self._networkType)
+        else:
+            self._explorer = java.lang.String(self._explorer)
 
         # Setup Node Client
         node_client = RestApiErgoClient.create(
             node_url,
             self._networkType,
             "",
-            RestApiErgoClient.getDefaultExplorerUrl(self._networkType)
+            self._explorer
         )
 
         # Initialize attributes
@@ -276,15 +281,21 @@ class ErgoAppKit:
         amount_counter = 0
         token_amount_counter = 0
         token_list = []
+        tList = []
 
         # TODO Complete documentation
         if amount_tokens is None:
             token_list = [[ErgoToken(x, 1) for x in token] for token in tokens]
         else:
             for token in tokens:
-                amount_tokens = amount_tokens[token_amount_counter]
-                tList = [ErgoToken(x, amount_tokens[token_amount_counter]) for x in token]
+                token_amount_counter_local = 0
+                token_amount_list = amount_tokens[token_amount_counter]
+                for x in token:
+                    token_amount = token_amount_list[token_amount_counter_local]
+                    tList.append(ErgoToken(x, token_amount))
+                    token_amount_counter_local += 1
                 token_list.append(tList)
+                tList = []
                 token_amount_counter += 1
 
         # TODO Complete documentation
