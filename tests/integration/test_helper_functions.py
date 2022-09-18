@@ -18,23 +18,25 @@ import sys
 logger: logging.Logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+
 # Tested functions
 def test_get_wallet_address():
-    # Expected
-    expected: str = "3WykkLPB7PdS2MA7uTTWNSoCaYiZsSLPtS7ZuH9TUjRgiL75ygfa"
+    #  Expected
+    expected: str = "3Wx2YrSVcrPvC7uXQRp6ZQfRd7VxjZr6fjhFEX5r1yiM8nHkGv93"
 
     # Arguments
     node_url: str = "http://213.239.193.208:9052/"
     ergo: ErgoAppKit = ErgoAppKit(node_url=node_url)
     amount: int = 1
-    wallet_mnemonic: str = "what stadium typical spell rate truly pen tongue fuel intact fluid strike vibrant city shine"
+    wallet_mnemonic: str = "decline reward asthma enter three clean borrow repeat identify wisdom horn pull entire adapt neglect"
 
     # Call function
     logging.info('BEGIN get_wallet_address')
-    actual: str = json.loads(helper_functions.get_wallet_address(ergo=ergo, amount=amount, wallet_mnemonic=wallet_mnemonic))[0]
-    logging.info('END get_wallet_address')
+    actual: str = helper_functions.get_wallet_address(ergo=ergo, amount=amount, wallet_mnemonic=wallet_mnemonic)[0]
+    logging.info(f'END get_wallet_address')
 
     assert actual == expected
+
 
 # Program entrypoint
 if __name__ == '__main__':
