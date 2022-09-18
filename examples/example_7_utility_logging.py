@@ -15,12 +15,13 @@ from ergpy import appkit, helper_functions
 from ergpy.logs import setup_logs_env, logging
 
 # Constants
-NODE_URL: str = "http://213.239.193.208:9052/" # MainNet or TestNet
+NODE_URL: str = "https://pai-net.mempoolnode.live"
+API_URL: str = "https://api.mempoolnode.live"
 
 # Main
 def main():
     # Initiate instance
-    ergo = appkit.ErgoAppKit(node_url=NODE_URL)
+    ergo = appkit.ErgoAppKit(node_url=NODE_URL, api_url=API_URL)
     logging.info(f"Connecting to node url: {NODE_URL}")
 
     # Transaction data
