@@ -32,9 +32,8 @@ def test_get_wallet_address():
 
     # Call function
     logging.info('BEGIN get_wallet_address')
-    actual: str = \
-    json.loads(helper_functions.get_wallet_address(ergo=ergo, amount=amount, wallet_mnemonic=wallet_mnemonic))[0]
-    logging.info('END get_wallet_address')
+    actual: str = helper_functions.get_wallet_address(ergo=ergo, amount=amount, wallet_mnemonic=wallet_mnemonic)[0]
+    logging.info(f'END get_wallet_address')
 
     assert actual == expected
 
