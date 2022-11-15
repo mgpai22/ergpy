@@ -13,6 +13,8 @@ CREATED AT
 # Import python packages
 import hashlib
 import base64
+import math
+
 import requests
 import jpype.imports
 
@@ -138,6 +140,9 @@ class ErgoAppKit:
         """Create Ergo Address from base58 string."""
         return Address.create(address)
 
+    def get_api_url(self):
+        return self._api
+
     def getSenderAddress(self, index: int, wallet_mnemonic: SecretString, wallet_password: SecretString):
         """Create an Eip3Address from given mnemonic phrase and mnemonic password."""
         return Address.createEip3Address(index, self._networkType, wallet_mnemonic, wallet_password)
@@ -173,14 +178,16 @@ class ErgoAppKit:
                 token_list = java.util.ArrayList([])
                 for token in tokenList:
                     for x in token:
-                        token_list.add(ErgoToken(x, 1))
+                        token_list.add(ErgoToken(x, 1 * int(math.pow(10, int(
+                            requests.get(f'{self._api}/api/v1/tokens/{x}').json()[
+                                'decimals'])))))
             else:
                 for token in tokenList:
                     token_amount_counter_local = 0
                     token_amount_list = amount_tokens[token_amount_counter]
                     for x in token:
                         token_amount = token_amount_list[token_amount_counter_local]
-                        tList.append(ErgoToken(x, token_amount))
+                        tList.append(ErgoToken(x, jpype.JLong(token_amount)))
                         token_amount_counter_local += 1
                     token_amount_counter += 1
                     token_list.append(tList)
@@ -208,7 +215,7 @@ class ErgoAppKit:
         amount_total = jpype.JLong(Parameters.OneErg * amount_list[0])
         tb = self._ctx.newTxBuilder()
         return [tb
-                    .outBoxBuilder() \
+                .outBoxBuilder() \
                     .value(amount_total) \
                     .mintToken(nft) \
                     .contract(ErgoTreeContract(receiver_wallet_address.getErgoAddress().script(), self._networkType)) \
@@ -230,7 +237,7 @@ class ErgoAppKit:
                 .build()
             outbox.append(box)
         return outbox
-    
+
     def genesis_box(self, sender_address, amount_of_boxes, amount):
         try:
             address = Address.create(sender_address)
@@ -250,12 +257,12 @@ class ErgoAppKit:
                           token_amount, token_decimals, amount_list: list,
                           receiver_wallet_address: Address):
         """TODO Complete documentation"""
-        token = Eip4Token(input_box.get(0).getId().toString(), token_amount, token_name, token_description,
+        token = Eip4Token(input_box.get(0).getId().toString(), jpype.JLong(token_amount), token_name, token_description,
                           token_decimals)
         amount_total = jpype.JLong(Parameters.OneErg * amount_list[0])
         tb = self._ctx.newTxBuilder()
         return [tb
-                    .outBoxBuilder() \
+                .outBoxBuilder() \
                     .value(amount_total) \
                     .mintToken(token) \
                     .contract(
@@ -293,14 +300,16 @@ class ErgoAppKit:
 
         # TODO Complete documentation
         if amount_tokens is None:
-            token_list = [[ErgoToken(x, 1) for x in token] for token in tokens]
+            token_list = [[ErgoToken(x, int(math.pow(10, int(
+                requests.get(f'{self._api}/api/v1/tokens/{x}').json()[
+                    'decimals'])))) for x in token] for token in tokens]
         else:
             for token in tokens:
                 token_amount_counter_local = 0
                 token_amount_list = amount_tokens[token_amount_counter]
                 for x in token:
                     token_amount = token_amount_list[token_amount_counter_local]
-                    tList.append(ErgoToken(x, token_amount))
+                    tList.append(ErgoToken(x, jpype.JLong(token_amount)))
                     token_amount_counter_local += 1
                 token_list.append(tList)
                 tList = []
@@ -325,7 +334,8 @@ class ErgoAppKit:
 
         return out_box
 
-    def buildUnsignedTransaction(self, input_box: InputBox, outBox: list, sender_address, fee=None) -> UnsignedTransaction:
+    def buildUnsignedTransaction(self, input_box: InputBox, outBox: list, sender_address,
+                                 fee=None) -> UnsignedTransaction:
         """Build an unsigned transaction."""
         if fee is None:
             fee = Parameters.MinFee

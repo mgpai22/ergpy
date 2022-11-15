@@ -13,10 +13,12 @@ CREATED AT
 # Import external packages
 import json
 import logging
+import math
 from typing import List
 
 import jpype
-from ergpy import appkit
+import requests
+import appkit
 
 
 # Functions
@@ -100,7 +102,8 @@ def simple_send(ergo: appkit.ErgoAppKit, amount: list, receiver_addresses: list,
         unsigned_tx = ergo.buildUnsignedTransactionChained(input_box=input_box, outBox=out_box,
                                                            sender_address=sender_address, amount_list=amount, fee=fee)
     else:
-        unsigned_tx = ergo.buildUnsignedTransaction(input_box=input_box, outBox=out_box, sender_address=sender_address, fee=fee)
+        unsigned_tx = ergo.buildUnsignedTransaction(input_box=input_box, outBox=out_box, sender_address=sender_address,
+                                                    fee=fee)
 
     if base64reduced:
         return ergo.getBase64ReducedTX(unsigned_tx)
@@ -139,7 +142,8 @@ def create_issuer_box(ergo: appkit.ErgoAppKit, wallet_mnemonic: str, royalty_amo
         unsigned_tx = ergo.buildUnsignedTransactionChained(input_box=input_box, outBox=out_box,
                                                            sender_address=sender_address, amount_list=[0.01], fee=fee)
     else:
-        unsigned_tx = ergo.buildUnsignedTransaction(input_box=input_box, outBox=out_box, sender_address=sender_address, fee=fee)
+        unsigned_tx = ergo.buildUnsignedTransaction(input_box=input_box, outBox=out_box, sender_address=sender_address,
+                                                    fee=fee)
 
     if base64reduced:
         return ergo.getBase64ReducedTX(unsigned_tx)
@@ -150,6 +154,7 @@ def create_issuer_box(ergo: appkit.ErgoAppKit, wallet_mnemonic: str, royalty_amo
         return signed_tx
 
     return ergo.txId(signed_tx)
+
 
 @initialize_jvm
 def create_gensis_box(ergo: appkit.ErgoAppKit, wallet_mnemonic: str, amount_per_box: int,
@@ -166,7 +171,8 @@ def create_gensis_box(ergo: appkit.ErgoAppKit, wallet_mnemonic: str, amount_per_
 
     # Get input box
     if input_box is None:
-        input_box = ergo.getInputBoxCovering(amount_list=[amount_per_box * amount_of_boxes], sender_address=sender_address)
+        input_box = ergo.getInputBoxCovering(amount_list=[amount_per_box * amount_of_boxes],
+                                             sender_address=sender_address)
 
     # Get output box
     out_box = ergo.genesis_box(sender_address=sender_address, amount_of_boxes=amount_of_boxes, amount=amount_per_box)
@@ -176,7 +182,8 @@ def create_gensis_box(ergo: appkit.ErgoAppKit, wallet_mnemonic: str, amount_per_
         unsigned_tx = ergo.buildUnsignedTransactionChained(input_box=input_box, outBox=out_box,
                                                            sender_address=sender_address, amount_list=[0.01], fee=fee)
     else:
-        unsigned_tx = ergo.buildUnsignedTransaction(input_box=input_box, outBox=out_box, sender_address=sender_address, fee=fee)
+        unsigned_tx = ergo.buildUnsignedTransaction(input_box=input_box, outBox=out_box, sender_address=sender_address,
+                                                    fee=fee)
 
     if base64reduced:
         return ergo.getBase64ReducedTX(unsigned_tx)
@@ -196,7 +203,16 @@ def send_token(ergo: appkit.ErgoAppKit, amount: list, receiver_addresses: list, 
                base64reduced: bool = None, return_signed=None, chained=None, fee=None):
     # Get mnemonic
     mnemonic = ergo.getMnemonic(wallet_mnemonic=wallet_mnemonic, mnemonic_password=mnemonic_password)
-
+    cnt = 0
+    if amount_tokens != None:
+        for item in amount_tokens:
+            cnt_inner = 0
+            for i in item:
+                item[cnt_inner] = i * math.pow(10, int(
+                    requests.get(f'{ergo.get_api_url()}/api/v1/tokens/{tokens[cnt][cnt_inner]}').json()[
+                        'decimals']))
+                cnt_inner += 1
+            cnt += 1
     # Get sender address
     sender_address = ergo.getSenderAddress(index=0, wallet_mnemonic=mnemonic[1], wallet_password=mnemonic[2]) \
         if sender_address is None \
@@ -215,7 +231,8 @@ def send_token(ergo: appkit.ErgoAppKit, amount: list, receiver_addresses: list, 
                                                            sender_address=sender_address, amount_list=amount,
                                                            tokens=True, fee=fee)
     else:
-        unsigned_tx = ergo.buildUnsignedTransaction(input_box=input_box, outBox=out_box, sender_address=sender_address, fee=fee)
+        unsigned_tx = ergo.buildUnsignedTransaction(input_box=input_box, outBox=out_box, sender_address=sender_address,
+                                                    fee=fee)
 
     if base64reduced:
         return ergo.getBase64ReducedTX(unsigned_tx)
@@ -260,7 +277,8 @@ def create_nft(ergo: appkit.ErgoAppKit, nft_name: str, description: str, image_l
         unsigned_tx = ergo.buildUnsignedTransactionChained(input_box=input_box, outBox=out_box,
                                                            sender_address=sender_address, amount_list=amount, fee=fee)
     else:
-        unsigned_tx = ergo.buildUnsignedTransaction(input_box=input_box, outBox=out_box, sender_address=sender_address, fee=fee)
+        unsigned_tx = ergo.buildUnsignedTransaction(input_box=input_box, outBox=out_box, sender_address=sender_address,
+                                                    fee=fee)
 
     if base64reduced:
         return ergo.getBase64ReducedTX(unsigned_tx)
@@ -295,12 +313,15 @@ def create_token(ergo: appkit.ErgoAppKit, token_name: str, description: str, tok
 
     input_box = ergo.getInputBox(amount_list=amount, sender_address=sender_address, tokenList=None)
 
+    token_amount = token_amount * math.pow(10, token_decimals)
+
     # Mint token
     outBox = ergo.tokenMinterOutBox(input_box, token_name, description,
                                     token_amount, token_decimals, amount, receiver_addresses)
 
     # Build transaction
-    unsigned_tx = ergo.buildUnsignedTransaction(input_box=input_box, outBox=outBox, sender_address=sender_address, fee=fee)
+    unsigned_tx = ergo.buildUnsignedTransaction(input_box=input_box, outBox=outBox, sender_address=sender_address,
+                                                fee=fee)
 
     if base64reduced:
         return ergo.getBase64ReducedTX(unsigned_tx)
