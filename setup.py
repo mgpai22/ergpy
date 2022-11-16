@@ -32,7 +32,7 @@ stubgenj>=0.2.5
 # Metadata configuration
 setup(
     name='ergpy',
-    version='0.1.8.7',
+    version='0.1.9.0',
     description='Python-jvm wrapper for interacting with the Ergo Blockchain',
     long_description=long_description,
     long_description_content_type='text/markdown',
