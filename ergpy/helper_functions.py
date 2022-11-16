@@ -18,7 +18,6 @@ from typing import List
 
 import jpype
 import requests
-import appkit
 from ergpy import appkit
 
 
