@@ -27,12 +27,13 @@ setuptools>=40.8.0
 JPype1>=1.3.0
 requests>=2.27.1
 stubgenj>=0.2.5
+click==8.1.3
 """
 
 # Metadata configuration
 setup(
     name='ergpy',
-    version='0.1.9.0',
+    version='0.1.10.0',
     description='Python-jvm wrapper for interacting with the Ergo Blockchain',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -42,5 +43,6 @@ setup(
     keywords='appkit',
     include_package_data=True,
     packages=['ergpy'],
-    install_requires=packages.split('\n')
+    install_requires=packages.split('\n'),
+    entry_points={'console_scripts': ['ergpy = ergpy.cli:handle_cli']}
 )
