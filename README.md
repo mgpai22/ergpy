@@ -4,7 +4,7 @@
   <br />
   Erg<strong>Py</string>
 </h1>
-<p align="center"><strong>Set of tools to reproduce MyoDev signal processing and ML</strong></p>
+<p align="center"><strong>python-jvm wrapper for interacting with the Ergo blockchain.</strong></p>
 
 <p align="center">
     <a href="https://github.com/mgpai22/ergpy/actions" target="_blank">
@@ -13,7 +13,7 @@
 </p>
 
 
-A python-jvm wrapper for interacting with the Ergo blockchain.
+<br><br>
 
 
 
