@@ -1,10 +1,12 @@
 # Packages
 import typing
 import click
+import ergpy
 import ergpy.helper_functions as ergpy_help
 
 
 # Constants
+OPTION__REQUIRED: dict = {'required': True}
 OPTION_NODE_URL: dict = {
     'envvar':'NODE_URL',
     'type':click.STRING,
@@ -32,7 +34,11 @@ OPTION_SENDER_ADDRESS: dict = {
     'type': click.STRING,
     'help': 'Address of the sender'
 }
-
+OPTION_TOKENS: dict = {
+    'type': click.STRING,
+    'help': 'Tokens',
+    'multiple': True
+}
 
 # Utils
 def secho_iterable(iterable: typing.Iterable, color: str='blue'):
@@ -63,6 +69,11 @@ def cli():
     pass
 
 # Get subcommands
+@cli.command()
+def version():
+    """Show the current version of the package"""
+    click.secho(f'ergpy {ergpy.__version__}', fg='blue')
+
 @cli.group()
 def get():
     """Retrieve information about wallet address, box info..."""
@@ -83,10 +94,10 @@ def create():
 
 # Commands
 @click.command()
-@click.option('--amount', **OPTION_AMOUNT)
-@click.option('--wallet-mnemonic', **OPTION_WALLET_MNEMONIC)
-@click.option('--mnemonic-password', **OPTION_MNEMONIC_PASSWORD)
-@click.option('--node-url', **OPTION_NODE_URL)
+@click.option('--amount', **OPTION_AMOUNT, **OPTION__REQUIRED)
+@click.option('--wallet-mnemonic', **OPTION_WALLET_MNEMONIC, **OPTION__REQUIRED)
+@click.option('--mnemonic-password', **OPTION_MNEMONIC_PASSWORD, **OPTION__REQUIRED)
+@click.option('--node-url', **OPTION_NODE_URL, **OPTION__REQUIRED)
 def wallet_address(node_url: str, amount: int, wallet_mnemonic: str, mnemonic_password: str = None):
     """Retrieve informations about (a) wallet address(es)."""
     click.secho(f'You selected : Get (a) wallet address(es)', fg='blue')
@@ -107,10 +118,11 @@ def wallet_address(node_url: str, amount: int, wallet_mnemonic: str, mnemonic_pa
         click.secho(f'Failed to retrieve wallet address(es) : {e}', fg='red')
 
 @click.command()
-@click.option('--node-url', **OPTION_NODE_URL)
-@click.option('--index', **OPTION_INDEX)
-@click.option('--sender-address', **OPTION_SENDER_ADDRESS)
-def box_info(node_url: str, index: int, sender_address: str, tokens: list = None):
+@click.option('--node-url', **OPTION_NODE_URL, **OPTION__REQUIRED)
+@click.option('--index', **OPTION_INDEX, **OPTION__REQUIRED)
+@click.option('--sender-address', **OPTION_SENDER_ADDRESS, **OPTION__REQUIRED)
+@click.option('--tokens', **OPTION_TOKENS)
+def box_info(node_url: str, index: int, sender_address: str, tokens: list=None):
     """Retrieve informations about box."""
     click.secho(f'You selected : Get box informations', fg='blue')
     click.echo(f'Connecting to blockchain @ {node_url}')

@@ -6,3 +6,6 @@ __all__ = [
     'helper_functions',
     'logs'
 ]
+
+# Version of the package
+__version__: str = '0.1.10.0'
