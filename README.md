@@ -1,7 +1,21 @@
 
-# ergpy 
+<h1 align="center">
+  <img src="./assets/ergo-logo.png" width="124" />
+  <br />
+  Erg<strong>Py</string>
+</h1>
+<p align="center"><strong>Set of tools to reproduce MyoDev signal processing and ML</strong></p>
+
+<p align="center">
+    <a href="https://github.com/mgpai22/ergpy/actions" target="_blank">
+        <img src="https://github.com/mgpai22/ergpy/actions/workflows/ci.yml/badge.svg" alt="Latest Action">
+    </a>
+</p>
+
 
 A python-jvm wrapper for interacting with the Ergo blockchain.
+
+
 
 # Usage
 
