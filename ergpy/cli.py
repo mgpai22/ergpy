@@ -39,6 +39,21 @@ OPTION_TOKENS: dict = {
     'help': 'Tokens',
     'multiple': True
 }
+OPTION_AMOUNTS: dict = {
+    'type': click.STRING,
+    'help': 'Amounts',
+    'multiple': True
+}
+OPTION_RECEIVER_ADDRESSESS: dict = {
+    'type': click.STRING,
+    'help': 'Addresses of receiver',
+    'multiple': True
+}
+OPTION_PROVERINDEX: dict = {
+    'type': click.INT,
+    'help': 'Prover Index'
+}
+OPTION__BOOL: dict = {'type': click.BOOL}
 
 # Utils
 def secho_iterable(iterable: typing.Iterable, color: str='blue'):
@@ -83,7 +98,7 @@ def get():
 @cli.group()
 def send():
     """simple send or send token"""
-    click.echo('Send what ?')
+    pass
 
 # Create subcommands
 @cli.group()
@@ -139,12 +154,51 @@ def box_info(node_url: str, index: int, sender_address: str, tokens: list=None):
         click.echo(f'Box informations')
         secho_iterable(box_informations)
     except Exception as e:
-        click.secho(f'Failed to retrieve wallet address(es) : {e}', fg='red')
+        click.secho(f'Failed to retrieve box informations : {e}', fg='red')
+
+@click.command()
+@click.option('--node-url', **OPTION_NODE_URL, **OPTION__REQUIRED)
+@click.option('--amounts', **OPTION_AMOUNTS, **OPTION__REQUIRED)
+@click.option('--receiver-addresses', **OPTION_RECEIVER_ADDRESSESS, **OPTION__REQUIRED)
+@click.option('--wallet-mnemonic', **OPTION_WALLET_MNEMONIC, **OPTION__REQUIRED)
+@click.option('--mnemonic-password', **OPTION_MNEMONIC_PASSWORD, **OPTION__REQUIRED)
+@click.option('--sender-address', **OPTION_SENDER_ADDRESS)
+@click.option('--prover-index', **OPTION_PROVERINDEX)
+@click.option('--base64reduced', **OPTION__BOOL)
+@click.option('--input-box')
+@click.option('--return-signed', **OPTION__BOOL)
+@click.option('--chained', **OPTION__BOOL)
+@click.option('--fee')
+def simple(**kwargs: dict):
+    """Simple send."""
+    click.secho(f'You selected : Simple send', fg='blue')
+    click.echo(f"Connecting to blockchain @ {kwargs.get('node_url')}")
+
+    # Trying to connect w/ blockchain
+    ergo: ergpy_help.appkit.ErgoAppKit = make_ergo(node_url=kwargs.get('node_url'))
+    if ergo is None:
+        return
+
+    # Launch operation
+    click.echo(f'Launch the simple send')
+    try:
+        transaction = ergpy_help.simple_send(ergo, **kwargs)
+        click.echo(f'Transaction')
+        click.secho(f'-> {transaction}', fg='blue')
+    except Exception as e:
+        click.secho(f'Failed to proceed with the transaction : {e}', fg='red')
+
+@click.command()
+def token():
+    pass
 
 def handle_cli():
     # Registering `get` commands
     get.add_command(wallet_address)
     get.add_command(box_info)
+
+    # Registering `send` commands
+    send.add_command(simple)
 
     # CLI
     cli()
