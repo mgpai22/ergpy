@@ -8,7 +8,7 @@
 
 <p align="center">
     <a href="https://github.com/mgpai22/ergpy/actions" target="_blank">
-        <img src="https://github.com/mgpai22/ergpy/actions/workflows/ci.yml/badge.svg" alt="Latest Action">
+        <img src="https://github.com/mgpai22/ergpy/actions/workflows/ci.yaml/badge.svg" alt="Latest Action">
     </a>
 </p>
 
