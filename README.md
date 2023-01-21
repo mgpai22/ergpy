@@ -2,9 +2,9 @@
 <h1 align="center">
   <img src="./assets/ergo-logo.png" width="124" />
   <br />
-  Erg<strong>Py</string>
+  Erg<strong>Py</strong>
 </h1>
-<p align="center"><strong>python-jvm wrapper for interacting with the Ergo blockchain.</strong></p>
+<p align="center"><strong>Python-JVM wrapper for interacting with the Ergo blockchain.</strong></p>
 
 <p align="center">
     <a href="https://github.com/mgpai22/ergpy/actions" target="_blank">
