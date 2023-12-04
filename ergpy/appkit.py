@@ -75,12 +75,6 @@ class TripExecutor(object):
     def apply(self, blockchain_context) -> BlockchainContext:
         return blockchain_context
 
-
-def tokenOutBoxList(tokens: list):
-    token_list = [ErgoToken(token, 1) for token in tokens]
-    return token_list
-
-
 def get_outputs_to_spend(signed_tx: SignedTransaction, index_for_outbox=None, asArray=None):
     if index_for_outbox is None:
         if asArray is False:
@@ -146,6 +140,13 @@ class ErgoAppKit:
     def getSenderAddress(self, index: int, wallet_mnemonic: SecretString, wallet_password: SecretString):
         """Create an Eip3Address from given mnemonic phrase and mnemonic password."""
         return Address.createEip3Address(index, self._networkType, wallet_mnemonic, wallet_password)
+
+    def tokenOutBoxList(self, tokens: list):
+        token_list = [ErgoToken(token, 1 * int(math.pow(10, int(
+                            requests.get(f'{self._api}/api/v1/tokens/{token}').json()[
+                                'decimals'])))) for token in tokens]
+
+        return token_list
 
     def getInputBox(self, amount_list: list, sender_address, tokenList) -> InputBox:
         """TODO Complete documentation"""
@@ -365,7 +366,7 @@ class ErgoAppKit:
             for i in range(len(input_box1.getTokens())):
                 token = input_box1.getTokens().get(i).getId()
                 t_list.append(token)
-            tokens = tokenOutBoxList(t_list)
+            tokens = self.tokenOutBoxList(t_list)
             tokens.pop(0)
             box = tb.outBoxBuilder() \
                 .value(ergo) \
